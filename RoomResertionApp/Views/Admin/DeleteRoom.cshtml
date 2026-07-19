@@ -1,0 +1,55 @@
+@model RoomResertionApp.Models.Room
+@{
+    ViewData["Title"] = "Delete Room";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h3 class="mb-0">Delete Room</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <strong>Warning:</strong> This action cannot be undone.
+                    </div>
+
+                    <dl class="row">
+                        <dt class="col-sm-4">Room Number:</dt>
+                        <dd class="col-sm-8">@Model.RoomNumber</dd>
+
+                        <dt class="col-sm-4">Type:</dt>
+                        <dd class="col-sm-8">@Model.Type</dd>
+
+                        <dt class="col-sm-4">Price/Night:</dt>
+                        <dd class="col-sm-8">@Model.PricePerNight.ToString("C")</dd>
+
+                        <dt class="col-sm-4">Capacity:</dt>
+                        <dd class="col-sm-8">@Model.Capacity</dd>
+
+                        <dt class="col-sm-4">Status:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.IsAvailable)
+                            {
+                                <span class="badge bg-success">Available</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">Unavailable</span>
+                            }
+                        </dd>
+                    </dl>
+
+                    <form asp-action="DeleteRoom" method="post">
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Rooms" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-danger">Delete Room</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

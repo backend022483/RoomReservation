@@ -1,0 +1,206 @@
+@model dynamic
+@{
+    ViewData["Title"] = "Room Occupancy";
+}
+
+<div class="container mt-5">
+    <h1 class="mb-4">Room Occupancy - @Model.Today.ToString("MMMM dd, yyyy")</h1>
+
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <h5 class="card-title">Arrivals</h5>
+                    <h2 class="card-text">@Model.Arrivals.Count</h2>
+                    <small>Checking in today</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <h5 class="card-title">Departures</h5>
+                    <h2 class="card-text">@Model.Departures.Count</h2>
+                    <small>Checking out today</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <h5 class="card-title">In-House</h5>
+                    <h2 class="card-text">@Model.InHouse.Count</h2>
+                    <small>Currently staying</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h5 class="card-title">Available</h5>
+                    <h2 class="card-text">@Model.AvailableRooms.Count</h2>
+                    <small>Rooms available today</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Arrivals Today</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Arrivals.Count > 0)
+                    {
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Room</th>
+                                    <th>Guest</th>
+                                    <th>Check-out</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var reservation in Model.Arrivals)
+                                {
+                                    <tr>
+                                        <td>@reservation.Room.RoomNumber</td>
+                                        <td>@reservation.Guest.FirstName @reservation.Guest.LastName</td>
+                                        <td>@reservation.CheckOutDate.ToString("MMM dd")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No arrivals today.</p>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-warning text-white">
+                    <h5 class="mb-0">Departures Today</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Departures.Count > 0)
+                    {
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Room</th>
+                                    <th>Guest</th>
+                                    <th>Check-in</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var reservation in Model.Departures)
+                                {
+                                    <tr>
+                                        <td>@reservation.Room.RoomNumber</td>
+                                        <td>@reservation.Guest.FirstName @reservation.Guest.LastName</td>
+                                        <td>@reservation.CheckInDate.ToString("MMM dd")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No departures today.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">In-House Guests</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.InHouse.Count > 0)
+                    {
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Room</th>
+                                    <th>Guest</th>
+                                    <th>Check-in</th>
+                                    <th>Check-out</th>
+                                    <th>Guests</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var reservation in Model.InHouse)
+                                {
+                                    <tr>
+                                        <td>@reservation.Room.RoomNumber</td>
+                                        <td>@reservation.Guest.FirstName @reservation.Guest.LastName</td>
+                                        <td>@reservation.CheckInDate.ToString("MMM dd, yyyy")</td>
+                                        <td>@reservation.CheckOutDate.ToString("MMM dd, yyyy")</td>
+                                        <td>@reservation.NumberOfGuests</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No in-house guests.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Available Rooms Today</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.AvailableRooms.Count > 0)
+                    {
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Room Number</th>
+                                    <th>Type</th>
+                                    <th>Capacity</th>
+                                    <th>Price/Night</th>
+                                    <th>Location</th>
+                                    <th>Amenities</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var room in Model.AvailableRooms)
+                                {
+                                    <tr>
+                                        <td>@room.RoomNumber</td>
+                                        <td>@room.Type</td>
+                                        <td>@room.Capacity</td>
+                                        <td>@room.PricePerNight.ToString("C")</td>
+                                        <td>@room.Location</td>
+                                        <td>@room.Amenities</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No rooms available today.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,84 @@
+@model List<RoomResertionApp.Models.Reservation>
+@{
+    ViewData["Title"] = "My Reservations";
+}
+
+<div class="container mt-5">
+    <h1 class="mb-4">My Reservations</h1>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (Model != null && Model.Count > 0)
+    {
+        <div class="row">
+            @foreach (var reservation in Model)
+            {
+                <div class="col-md-12 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <h5 class="card-title">@reservation.Room.Type - Room @reservation.Room.RoomNumber</h5>
+                                    <h6 class="card-subtitle mb-2 text-muted">Confirmation: @reservation.ConfirmationNumber</h6>
+                                    <p class="card-text mb-1"><strong>Check-in:</strong> @reservation.CheckInDate.ToString("MMM dd, yyyy")</p>
+                                    <p class="card-text mb-1"><strong>Check-out:</strong> @reservation.CheckOutDate.ToString("MMM dd, yyyy")</p>
+                                    <p class="card-text mb-1"><strong>Guests:</strong> @reservation.NumberOfGuests</p>
+                                    <p class="card-text mb-1"><strong>Total Price:</strong> @reservation.TotalPrice.ToString("C")</p>
+                                    <p class="card-text mb-1"><strong>Guest:</strong> @reservation.Guest.FirstName @reservation.Guest.LastName</p>
+                                    <p class="card-text mb-0"><strong>Status:</strong> 
+                                        @if (reservation.Status == "Confirmed")
+                                        {
+                                            <span class="badge bg-success">Confirmed</span>
+                                        }
+                                        else if (reservation.Status == "Pending")
+                                        {
+                                            <span class="badge bg-warning">Pending</span>
+                                        }
+                                        else if (reservation.Status == "Cancelled")
+                                        {
+                                            <span class="badge bg-danger">Cancelled</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">@reservation.Status</span>
+                                        }
+                                    </p>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    @if (reservation.Status == "Confirmed" || reservation.Status == "Pending")
+                                    {
+                                        @if (reservation.CheckInDate > DateTime.Today)
+                                        {
+                                            <a asp-action="EditReservation" asp-route-id="@reservation.Id" class="btn btn-info btn-sm mb-2">Modify</a>
+                                            <a asp-action="CancelReservation" asp-route-id="@reservation.Id" class="btn btn-danger btn-sm mb-2">Cancel</a>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-secondary btn-sm mb-2" disabled>Cannot Modify (Started)</button>
+                                        }
+                                    }
+                                    else if (reservation.Status == "Cancelled")
+                                    {
+                                        <button class="btn btn-secondary btn-sm mb-2" disabled>Cancelled</button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            You have no reservations yet. <a asp-action="SelectRoom" class="alert-link">Book a room now</a>.
+        </div>
+    }
+</div>

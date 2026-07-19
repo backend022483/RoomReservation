@@ -1,0 +1,68 @@
+@model RoomResertionApp.Models.Reservation
+@{
+    ViewData["Title"] = "Cancel Reservation";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h3 class="mb-0">Cancel Reservation</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <strong>Warning:</strong> This action cannot be undone.
+                    </div>
+
+                    <dl class="row">
+                        <dt class="col-sm-4">Confirmation:</dt>
+                        <dd class="col-sm-8">@Model.ConfirmationNumber</dd>
+
+                        <dt class="col-sm-4">Room:</dt>
+                        <dd class="col-sm-8">@Model.Room.Type - Room @Model.Room.RoomNumber</dd>
+
+                        <dt class="col-sm-4">Check-in:</dt>
+                        <dd class="col-sm-8">@Model.CheckInDate.ToString("MMM dd, yyyy")</dd>
+
+                        <dt class="col-sm-4">Check-out:</dt>
+                        <dd class="col-sm-8">@Model.CheckOutDate.ToString("MMM dd, yyyy")</dd>
+
+                        <dt class="col-sm-4">Guests:</dt>
+                        <dd class="col-sm-8">@Model.NumberOfGuests</dd>
+
+                        <dt class="col-sm-4">Total Price:</dt>
+                        <dd class="col-sm-8">@Model.TotalPrice.ToString("C")</dd>
+
+                        <dt class="col-sm-4">Guest:</dt>
+                        <dd class="col-sm-8">@Model.Guest.FirstName @Model.Guest.LastName</dd>
+
+                        <dt class="col-sm-4">Status:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.Status == "Confirmed")
+                            {
+                                <span class="badge bg-success">Confirmed</span>
+                            }
+                            else if (Model.Status == "Pending")
+                            {
+                                <span class="badge bg-warning">Pending</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">@Model.Status</span>
+                            }
+                        </dd>
+                    </dl>
+
+                    <form asp-action="CancelReservation" method="post">
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="MyReservations" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-danger">Confirm Cancellation</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

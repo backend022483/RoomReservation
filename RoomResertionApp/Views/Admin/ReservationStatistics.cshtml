@@ -1,0 +1,136 @@
+@model dynamic
+@{
+    ViewData["Title"] = "Reservation Statistics";
+}
+
+<div class="container mt-5">
+    <h1 class="mb-4">Reservation Statistics</h1>
+
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h5 class="card-title">Total Reservations</h5>
+                    <h2 class="card-text">@Model.TotalReservations</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <h5 class="card-title">Confirmed</h5>
+                    <h2 class="card-text">@Model.ConfirmedReservations</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <h5 class="card-title">Pending</h5>
+                    <h2 class="card-text">@Model.PendingReservations</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-danger">
+                <div class="card-body">
+                    <h5 class="card-title">Cancelled</h5>
+                    <h2 class="card-text">@Model.CancelledReservations</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Total Revenue</h5>
+                </div>
+                <div class="card-body">
+                    <h3 class="text-success">@Model.TotalRevenue.ToString("C")</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Average Revenue per Reservation</h5>
+                </div>
+                <div class="card-body">
+                    @{
+                        var avgRevenue = Model.TotalReservations > 0 ? Model.TotalRevenue / Model.TotalReservations : 0;
+                    }
+                    <h3 class="text-info">@avgRevenue.ToString("C")</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Reservations by Month (Last 6 Months)</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Month</th>
+                                <th>Year</th>
+                                <th>Count</th>
+                                <th>Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.ReservationsByMonth)
+                            {
+                                <tr>
+                                    <td>@System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(item.Month)</td>
+                                    <td>@item.Year</td>
+                                    <td>@item.Count</td>
+                                    <td>@item.Revenue.ToString("C")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Top 5 Most Booked Rooms</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Room</th>
+                                <th>Type</th>
+                                <th>Bookings</th>
+                                <th>Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.MostBookedRooms)
+                            {
+                                var room = ((IEnumerable<dynamic>)Model.RoomDetails).FirstOrDefault(r => r.Id == item.RoomId);
+                                <tr>
+                                    <td>Room @(room?.RoomNumber ?? "N/A")</td>
+                                    <td>@(room?.Type ?? "N/A")</td>
+                                    <td>@item.Count</td>
+                                    <td>@item.Revenue.ToString("C")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

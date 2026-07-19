@@ -1,0 +1,58 @@
+@model RoomResertionApp.Models.Reservation
+@{
+    ViewData["Title"] = "Confirm Booking";
+}
+
+<div class="container mt-5">
+    <h1 class="mb-4">Confirm Your Booking</h1>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Booking Summary</h5>
+            <hr />
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <p><strong>Room:</strong> @Model.Room.Type - Room @Model.Room.RoomNumber</p>
+                    <p><strong>Check-in:</strong> @Model.CheckInDate.ToString("dddd, MMMM dd, yyyy")</p>
+                    <p><strong>Check-out:</strong> @Model.CheckOutDate.ToString("dddd, MMMM dd, yyyy")</p>
+                    <p><strong>Number of Nights:</strong> @((int)(Model.CheckOutDate - Model.CheckInDate).TotalDays)</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Guest:</strong> @Model.Guest.FirstName @Model.Guest.LastName</p>
+                    <p><strong>Email:</strong> @Model.Guest.Email</p>
+                    <p><strong>Phone:</strong> @Model.Guest.PhoneNumber</p>
+                    @if (!string.IsNullOrEmpty(Model.Guest.Address))
+                    {
+                        <p><strong>Address:</strong> @Model.Guest.Address</p>
+                    }
+                    <p><strong>Number of Guests:</strong> @Model.NumberOfGuests</p>
+                </div>
+            </div>
+            
+            <hr />
+            <h4 class="text-end">Total Price: $@Model.TotalPrice.ToString("F2")</h4>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Terms & Conditions</h5>
+            <ul>
+                <li>Cancellation must be made at least 24 hours before check-in</li>
+                <li>Check-in time is 3:00 PM, Check-out time is 11:00 AM</li>
+                <li>Valid ID required at check-in</li>
+                <li>Payment will be processed upon confirmation</li>
+            </ul>
+        </div>
+    </div>
+
+    <form asp-action="Confirm" method="post">
+        <input type="hidden" name="id" value="@Model.Id" />
+
+        <div class="d-flex justify-content-between">
+            <button type="submit" name="action" value="cancel" class="btn btn-secondary">Cancel</button>
+            <button type="submit" name="action" value="confirm" class="btn btn-success btn-lg">Confirm Booking</button>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,105 @@
+@model List<RoomResertionApp.Models.Room>
+@{
+    ViewData["Title"] = "View Rooms";
+    var userRole = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value;
+    var canBook = new[] { "Receptionist", "Administrator", "HotelManager" }.Contains(userRole);
+}
+
+<div class="container mt-5">
+    <h1 class="mb-4">View Rooms</h1>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            @if (canBook)
+            {
+                <form asp-action="SelectRoom" method="post">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label class="form-label">Check-in Date</label>
+                            <input type="date" name="checkIn" class="form-control" value="@ViewBag.CheckIn" required />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Check-out Date</label>
+                            <input type="date" name="checkOut" class="form-control" value="@ViewBag.CheckOut" required />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Number of Guests</label>
+                            <input type="number" name="guests" class="form-control" value="@ViewBag.Guests" min="1" max="10" required />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Location</label>
+                            <input type="text" name="location" class="form-control" value="@ViewBag.Location" placeholder="Any location" />
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Amenities (comma-separated)</label>
+                            <input type="text" name="amenities" class="form-control" value="@ViewBag.Amenities" placeholder="e.g., WiFi, TV, AC" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Min Capacity</label>
+                            <input type="number" name="minCapacity" class="form-control" value="@ViewBag.MinCapacity" min="1" placeholder="Any" />
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">Search Available Rooms</button>
+                        </div>
+                    </div>
+                </form>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <strong>Guest View:</strong> You can only view available rooms. To make a reservation, please contact reception.
+                </div>
+            }
+        </div>
+    </div>
+
+    @if (Model != null && Model.Count > 0)
+    {
+        <div class="row">
+            @foreach (var room in Model)
+            {
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">@room.Type - Room @room.RoomNumber</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">$@room.PricePerNight / night</h6>
+                            <p class="card-text">@room.Description</p>
+                            <ul class="list-unstyled">
+                                <li><strong>Capacity:</strong> @room.Capacity guests</li>
+                                @if (!string.IsNullOrEmpty(room.Location))
+                                {
+                                    <li><strong>Location:</strong> @room.Location</li>
+                                }
+                                @if (!string.IsNullOrEmpty(room.Amenities))
+                                {
+                                    <li><strong>Amenities:</strong> @room.Amenities</li>
+                                }
+                                <li><strong>Status:</strong> @(room.IsAvailable ? "Available" : "Not Available")</li>
+                            </ul>
+                            @if (canBook)
+                            {
+                                <a asp-action="GuestInfo" asp-route-roomId="@room.Id"
+                                   asp-route-checkIn="@ViewBag.CheckIn"
+                                   asp-route-checkOut="@ViewBag.CheckOut"
+                                   asp-route-guests="@ViewBag.Guests"
+                                   class="btn btn-success">Book This Room</a>
+                            }
+                            else
+                            {
+                                <button class="btn btn-secondary" disabled>Contact Reception to Book</button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            No rooms available for the selected criteria. Please try different dates or number of guests.
+        </div>
+    }
+</div>
