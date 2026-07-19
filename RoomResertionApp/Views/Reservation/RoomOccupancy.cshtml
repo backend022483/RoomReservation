@@ -4,7 +4,23 @@
 }
 
 <div class="container mt-5">
-    <h1 class="mb-4">Room Occupancy - @Model.Today.ToString("MMMM dd, yyyy")</h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">Room Occupancy</h1>
+        <div class="d-flex align-items-center gap-2">
+            <a asp-action="RoomOccupancy" asp-route-date="@Model.Today.AddDays(-1).ToString("yyyy-MM-dd")" class="btn btn-outline-primary">
+                <i class="bi bi-chevron-left"></i> Previous Day
+            </a>
+            <form asp-action="RoomOccupancy" method="get" class="d-flex gap-2">
+                <input type="date" name="date" value="@Model.Today.ToString("yyyy-MM-dd")" class="form-control" style="width: auto;" />
+                <button type="submit" class="btn btn-primary">Go</button>
+            </form>
+            <a asp-action="RoomOccupancy" asp-route-date="@Model.Today.AddDays(1).ToString("yyyy-MM-dd")" class="btn btn-outline-primary">
+                Next Day <i class="bi bi-chevron-right"></i>
+            </a>
+            <a asp-action="RoomOccupancy" class="btn btn-secondary">Today</a>
+        </div>
+    </div>
+    <h2 class="mb-4 text-muted">@Model.Today.ToString("dddd, MMMM dd, yyyy")</h2>
 
     <div class="row mb-4">
         <div class="col-md-3">
@@ -60,6 +76,8 @@
                                     <th>Room</th>
                                     <th>Guest</th>
                                     <th>Check-out</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -69,6 +87,45 @@
                                         <td>@reservation.Room.RoomNumber</td>
                                         <td>@reservation.Guest.FirstName @reservation.Guest.LastName</td>
                                         <td>@reservation.CheckOutDate.ToString("MMM dd")</td>
+                                        <td>
+                                            @if (reservation.Status == "Confirmed")
+                                            {
+                                                <span class="badge bg-success">Confirmed</span>
+                                            }
+                                            else if (reservation.Status == "Pending")
+                                            {
+                                                <span class="badge bg-warning">Pending</span>
+                                            }
+                                            else if (reservation.Status == "Checked-in")
+                                            {
+                                                <span class="badge bg-info">Checked-in</span>
+                                            }
+                                            else if (reservation.Status == "Checked-out")
+                                            {
+                                                <span class="badge bg-secondary">Checked-out</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">@reservation.Status</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (reservation.Status == "Pending")
+                                            {
+                                                <form asp-action="ApproveReservation" method="post" style="display:inline;">
+                                                    <input type="hidden" name="id" value="@reservation.Id" />
+                                                    <button type="submit" class="btn btn-sm btn-success">Approve</button>
+                                                </form>
+                                            }
+                                            @if (reservation.Status == "Confirmed")
+                                            {
+                                                <form asp-action="CheckInReservation" method="post" style="display:inline;">
+                                                    <input type="hidden" name="id" value="@reservation.Id" />
+                                                    <button type="submit" class="btn btn-sm btn-info">Check In</button>
+                                                </form>
+                                            }
+                                            <a asp-action="CancelReservation" asp-route-id="@reservation.Id" class="btn btn-sm btn-danger">Cancel</a>
+                                        </td>
                                     </tr>
                                 }
                             </tbody>
@@ -95,6 +152,8 @@
                                     <th>Room</th>
                                     <th>Guest</th>
                                     <th>Check-in</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -104,6 +163,38 @@
                                         <td>@reservation.Room.RoomNumber</td>
                                         <td>@reservation.Guest.FirstName @reservation.Guest.LastName</td>
                                         <td>@reservation.CheckInDate.ToString("MMM dd")</td>
+                                        <td>
+                                            @if (reservation.Status == "Confirmed")
+                                            {
+                                                <span class="badge bg-success">Confirmed</span>
+                                            }
+                                            else if (reservation.Status == "Pending")
+                                            {
+                                                <span class="badge bg-warning">Pending</span>
+                                            }
+                                            else if (reservation.Status == "Checked-in")
+                                            {
+                                                <span class="badge bg-info">Checked-in</span>
+                                            }
+                                            else if (reservation.Status == "Checked-out")
+                                            {
+                                                <span class="badge bg-secondary">Checked-out</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">@reservation.Status</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (reservation.Status == "Checked-in")
+                                            {
+                                                <form asp-action="CheckOutReservation" method="post" style="display:inline;">
+                                                    <input type="hidden" name="id" value="@reservation.Id" />
+                                                    <button type="submit" class="btn btn-sm btn-secondary">Check Out</button>
+                                                </form>
+                                            }
+                                            <a asp-action="CancelReservation" asp-route-id="@reservation.Id" class="btn btn-sm btn-danger">Cancel</a>
+                                        </td>
                                     </tr>
                                 }
                             </tbody>
@@ -135,6 +226,8 @@
                                     <th>Check-in</th>
                                     <th>Check-out</th>
                                     <th>Guests</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -146,6 +239,31 @@
                                         <td>@reservation.CheckInDate.ToString("MMM dd, yyyy")</td>
                                         <td>@reservation.CheckOutDate.ToString("MMM dd, yyyy")</td>
                                         <td>@reservation.NumberOfGuests</td>
+                                        <td>
+                                            @if (reservation.Status == "Confirmed")
+                                            {
+                                                <span class="badge bg-success">Confirmed</span>
+                                            }
+                                            else if (reservation.Status == "Pending")
+                                            {
+                                                <span class="badge bg-warning">Pending</span>
+                                            }
+                                            else if (reservation.Status == "Checked-in")
+                                            {
+                                                <span class="badge bg-info">Checked-in</span>
+                                            }
+                                            else if (reservation.Status == "Checked-out")
+                                            {
+                                                <span class="badge bg-secondary">Checked-out</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">@reservation.Status</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <a asp-action="CancelReservation" asp-route-id="@reservation.Id" class="btn btn-sm btn-danger">Cancel</a>
+                                        </td>
                                     </tr>
                                 }
                             </tbody>

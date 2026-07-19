@@ -579,10 +579,26 @@ namespace RoomResertionApp.Controllers
             }
 
             var userId = int.Parse(userIdClaim);
-            var reservation = await _context.Reservations
-                .Include(r => r.Room)
-                .Include(r => r.Guest)
-                .FirstOrDefaultAsync(r => r.Id == id && r.UserId == userId);
+            var userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+
+            Reservation reservation;
+
+            // Admin, Manager, and Receptionist can cancel any reservation
+            if (userRole == "Administrator" || userRole == "HotelManager" || userRole == "Receptionist")
+            {
+                reservation = await _context.Reservations
+                    .Include(r => r.Room)
+                    .Include(r => r.Guest)
+                    .FirstOrDefaultAsync(r => r.Id == id);
+            }
+            else
+            {
+                // Regular users can only cancel their own reservations
+                reservation = await _context.Reservations
+                    .Include(r => r.Room)
+                    .Include(r => r.Guest)
+                    .FirstOrDefaultAsync(r => r.Id == id && r.UserId == userId);
+            }
 
             if (reservation == null)
             {
@@ -593,7 +609,7 @@ namespace RoomResertionApp.Controllers
             if (reservation.CheckInDate <= DateTime.Today)
             {
                 ModelState.AddModelError("", "Cannot cancel reservations that have already started or completed.");
-                return RedirectToAction("MyReservations");
+                return RedirectToAction(userRole == "Administrator" || userRole == "HotelManager" || userRole == "Receptionist" ? "RoomOccupancy" : "MyReservations");
             }
 
             return View(reservation);
@@ -610,8 +626,20 @@ namespace RoomResertionApp.Controllers
             }
 
             var userId = int.Parse(userIdClaim);
-            var reservation = await _context.Reservations
-                .FirstOrDefaultAsync(r => r.Id == id && r.UserId == userId);
+            var userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+
+            Reservation reservation;
+
+            // Admin, Manager, and Receptionist can cancel any reservation
+            if (userRole == "Administrator" || userRole == "HotelManager" || userRole == "Receptionist")
+            {
+                reservation = await _context.Reservations.FirstOrDefaultAsync(r => r.Id == id);
+            }
+            else
+            {
+                // Regular users can only cancel their own reservations
+                reservation = await _context.Reservations.FirstOrDefaultAsync(r => r.Id == id && r.UserId == userId);
+            }
 
             if (reservation == null)
             {
@@ -638,40 +666,94 @@ namespace RoomResertionApp.Controllers
             // }
 
             TempData["SuccessMessage"] = "Reservation cancelled successfully.";
-            return RedirectToAction("MyReservations");
+            return RedirectToAction(userRole == "Administrator" || userRole == "HotelManager" || userRole == "Receptionist" ? "RoomOccupancy" : "MyReservations");
+        }
+
+        // POST: Reservation/ApproveReservation/5
+        [HttpPost]
+        [Authorize(Roles = "Administrator,HotelManager,Receptionist")]
+        public async Task<IActionResult> ApproveReservation(int id)
+        {
+            var reservation = await _context.Reservations.FindAsync(id);
+            if (reservation == null)
+            {
+                return NotFound();
+            }
+
+            reservation.Status = "Confirmed";
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Reservation approved successfully.";
+            return RedirectToAction("RoomOccupancy");
+        }
+
+        // POST: Reservation/CheckInReservation/5
+        [HttpPost]
+        [Authorize(Roles = "Administrator,HotelManager,Receptionist")]
+        public async Task<IActionResult> CheckInReservation(int id)
+        {
+            var reservation = await _context.Reservations.FindAsync(id);
+            if (reservation == null)
+            {
+                return NotFound();
+            }
+
+            reservation.Status = "Checked-in";
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Guest checked in successfully.";
+            return RedirectToAction("RoomOccupancy");
+        }
+
+        // POST: Reservation/CheckOutReservation/5
+        [HttpPost]
+        [Authorize(Roles = "Administrator,HotelManager,Receptionist")]
+        public async Task<IActionResult> CheckOutReservation(int id)
+        {
+            var reservation = await _context.Reservations.FindAsync(id);
+            if (reservation == null)
+            {
+                return NotFound();
+            }
+
+            reservation.Status = "Checked-out";
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Guest checked out successfully.";
+            return RedirectToAction("RoomOccupancy");
         }
 
         // GET: Reservation/RoomOccupancy
-        public async Task<IActionResult> RoomOccupancy()
+        public async Task<IActionResult> RoomOccupancy(DateTime? date = null)
         {
-            var today = DateTime.Today;
+            var today = date ?? DateTime.Today;
 
-            // Arrivals - Check-in today
+            // Arrivals - Check-in on selected date
             var arrivals = await _context.Reservations
                 .Include(r => r.Room)
                 .Include(r => r.Guest)
-                .Where(r => r.CheckInDate.Date == today && (r.Status == "Confirmed" || r.Status == "Pending"))
+                .Where(r => r.CheckInDate.Date == today.Date && (r.Status == "Confirmed" || r.Status == "Pending" || r.Status == "Checked-in"))
                 .ToListAsync();
 
-            // Departures - Check-out today
+            // Departures - Check-out on selected date
             var departures = await _context.Reservations
                 .Include(r => r.Room)
                 .Include(r => r.Guest)
-                .Where(r => r.CheckOutDate.Date == today && (r.Status == "Confirmed" || r.Status == "Pending"))
+                .Where(r => r.CheckOutDate.Date == today.Date && (r.Status == "Confirmed" || r.Status == "Pending" || r.Status == "Checked-in"))
                 .ToListAsync();
 
             // In-house - Currently staying (checked in before today, checking out after today)
             var inHouse = await _context.Reservations
                 .Include(r => r.Room)
                 .Include(r => r.Guest)
-                .Where(r => r.CheckInDate.Date < today && r.CheckOutDate.Date > today && (r.Status == "Confirmed" || r.Status == "Pending"))
+                .Where(r => r.CheckInDate.Date < today.Date && r.CheckOutDate.Date > today.Date && (r.Status == "Confirmed" || r.Status == "Pending" || r.Status == "Checked-in"))
                 .ToListAsync();
 
-            // Available rooms - Not booked for today
+            // Available rooms - Not booked for selected date
             var bookedRoomIds = await _context.Reservations
-                .Where(r => (r.Status == "Confirmed" || r.Status == "Pending") &&
-                            r.CheckInDate.Date <= today &&
-                            r.CheckOutDate.Date > today)
+                .Where(r => (r.Status == "Confirmed" || r.Status == "Pending" || r.Status == "Checked-in") &&
+                            r.CheckInDate.Date <= today.Date &&
+                            r.CheckOutDate.Date > today.Date)
                 .Select(r => r.RoomId)
                 .ToListAsync();
 
