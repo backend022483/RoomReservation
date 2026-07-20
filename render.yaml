@@ -3,8 +3,8 @@ services:
     name: roomreservation-app
     env: docker
     plan: free
-    dockerfilePath: ./Dockerfile
-    dockerContext: .
+    dockerfilePath: ./RoomResertionApp/Dockerfile
+    dockerContext: ./RoomResertionApp
     envVars:
       - key: ASPNETCORE_ENVIRONMENT
         value: Production
