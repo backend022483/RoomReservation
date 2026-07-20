@@ -3,6 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using RoomResertionApp.Data;
 using RoomResertionApp.Services;
 
+// Disable file watching to avoid inotify limit issues in containerized environments
+Environment.SetEnvironmentVariable("DOTNET_USE_POLLING_FILE_WATCHER", "1");
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
