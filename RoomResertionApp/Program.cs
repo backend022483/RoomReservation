@@ -26,15 +26,6 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.SlidingExpiration = true;
     });
 
-// Configure Data Protection for containerized environment
-var dataProtectionPath = Path.Combine(builder.Environment.ContentRootPath, "data-protection");
-if (!Directory.Exists(dataProtectionPath))
-{
-    Directory.CreateDirectory(dataProtectionPath);
-}
-builder.Services.AddDataProtection()
-    .PersistKeysToFileSystem(new DirectoryInfo(dataProtectionPath))
-    .SetApplicationName("RoomReservationApp");
 
 var app = builder.Build();
 
